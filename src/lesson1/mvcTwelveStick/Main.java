@@ -3,13 +3,15 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        TwelveStickGame model = new TwelveStickGame();
+        AI ai = new AI();
+        TwelveStickGame model = new TwelveStickGame(ai);
         GameView view = new GameView(model);
         GameController controller = new GameController(model, view);
 
         controller.playGame();
     }
 }
+
 interface GameOverChecker{
     boolean isGameOver();
     String getWinner();
@@ -25,7 +27,12 @@ interface PlayerTurn{
 interface LanguageSelector{
     void languageSelector();
 }
-interface Game extends GameOverChecker, StickManipulator, PlayerTurn, LanguageSelector {
+
+interface AIEnableFunction{
+    void aiEnableFunction();
+}
+interface Game extends GameOverChecker, StickManipulator, PlayerTurn, LanguageSelector, AIEnableFunction {
+    void aiEnableFunction();
     int getSticks();
     boolean isPlayerOneTurn();
     boolean isGameOver();
@@ -34,11 +41,17 @@ interface Game extends GameOverChecker, StickManipulator, PlayerTurn, LanguageSe
 }
 
 class TwelveStickGame implements Game {
+    private final AI ai;
     private int sticks = 12;
     private boolean isPlayerOneTurn = true;
+    private boolean aiEnabled = false;
 
     String [][] dict= {{"Player 1","Player 2","'s turn. How many sticks will you take? (1-3): ","'s turn. How many sticks will you take? (1-3): ","Invalid move! Try again."," wins!"},
                     {"Jugador 1","Jugador 2"," ¿Cuántos palos tomarás? (1-3): "," ¿Cuántos palos tomarás? (1-3): ","¡Movimiento inválido! Inténtalo de nuevo."," gana!"}};
+
+    TwelveStickGame(AI ai) {
+        this.ai = ai;
+    }
 
     public int getSticks() {
         return sticks;
@@ -76,6 +89,10 @@ class TwelveStickGame implements Game {
             dict[0][4] = dict[1][4];
             dict[0][5] = dict[1][5];
         }
+    }
+
+    public void aiEnableFunction(){
+        ai.enableAI();
     }
 }
 interface InformationDisplayer{
@@ -154,7 +171,7 @@ class GameController implements GameControllerInterface {
     }
 
     public void playGame() {
-//TO DO        aiEnabled();
+        model.aiEnableFunction();
         languageSelectorForController();
         while (!model.isGameOver()) {
             view.displayGameState(model.getSticks());
